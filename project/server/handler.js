@@ -2,23 +2,26 @@
 
 var fs = require('fs');
 var lib = require('./lib');
-var config = lib.config;
 var path = require('path');
 
+// default config from lib, gets modified here, and passed to server in handler.
+var config = lib.default_config; 
 
-var handlers = {};
+// URI which get routed to function handlers
+var handlers = {
+    // default handler
+    '/' : function( req, res ) {
+        var page = '<!doctype html><html><head><title>Node Server Skeleton - Hello World</title></head><body><h1>Hello World!</h1><br>Node Server Skeleton, &copy; 2013</body></html>';
+        res.writeHeader( 200, { "Content-Type": 'text/html' } );
+        res.write( page );
+        res.end();
+    }
+};
 
-// default handler
-handlers['/'] = function( req, res ) {
-    var page = '<!doctype html><html><head><title>Node Server Skeleton - Hello World</title></head><body><h1>Hello World!</h1><br>Node Server Skeleton</body></html>';
-    res.writeHeader( 200, { Content-Type: 'text/html' } );
-    res.write( page );
-    res.end();
-}
-
-function setAppDir( app_path )
+function setAppDir( unresolved_path )
 {
     try {
+        var app_path = path.resolve( unresolved_path );
         var stat = fs.statSync( app_path );
     } catch(e) {
         lib.log( 'Error: "' + app_path + '" does not exist' );
@@ -32,11 +35,20 @@ function setAppDir( app_path )
 
     config['app_path'] = app_path;
     config['static_dir'] = app_path; // config can still overwrite
+    config['server_name'] = path.basename( app_path ); // set here. can set to something better in config.js
 
-    // look for config.js in the application directory. If found,
-    //  overwrite any config directives with ones supplied from it.
-    // Also, most importantly, propagate the handlers from the config.handler
-    //  field
+    // can pass config object as optional 2nd argument  
+    if ( arguments.length > 1 && lib.type_of(arguments[1]) === 'object' ) {
+        var o = arguments[1];
+        for ( var i in o ) {
+            if ( o.hasOwnProperty(i) ) {
+                config[i] = o[i];
+            }
+        }
+    }
+
+    // Look for config.js in the application directory. If found,
+    //  set (or overwrite) config directives with ones supplied from it.
     try { 
         var app_conf_path = path.resolve( app_path, 'config.js' ) ;
         stat = fs.statSync( app_conf_path );
@@ -46,15 +58,15 @@ function setAppDir( app_path )
                 config[key] = app_conf[key];
             }
         }
+    } catch(e) { }
 
-        if ( config['handler'] ) {
-            for ( var uri in config['handler'] ) {
-                if ( config['handler'].hasOwnProperty(uri) ) {
-                    handlers[uri] = config['handler'][uri];
-                }
+    // propagate the handlers from the config.handler field
+    if ( config['handler'] ) {
+        for ( var uri in config['handler'] ) {
+            if ( config['handler'].hasOwnProperty(uri) ) {
+                handlers[uri] = config['handler'][uri];
             }
         }
-    } catch(e) { 
     }
 }
 exports.setApp = setAppDir;

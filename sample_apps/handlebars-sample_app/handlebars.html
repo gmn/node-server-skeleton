@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+
+<!--
+    STYLESHEET LINKS
+
+<link rel="stylesheet" type="text/css" href="">
+-->
+
+<!-- 
+    INLINE STYLES
+
+-->
+<style type="text/css">
+#templ {
+    padding:8px;
+    background-color:#ccc;
+    border:1px solid #333;
+    margin:10px auto;
+}
+</style>
+
+<!-- 
+    HANDLEBARS TEMPLATES
+
+-->
+<script id="header" type="text/x-handlebars-template">
+<div id="templ"> <h2>{{ headerTitle }}</h2> 
+    Today is {{weekDay}} <br>
+    And my friend's name is {{friendName}}
+</div>
+</script>
+
+<!-- 
+    JAVASCRIPT LINKS
+
+-->
+<script type="text/javascript" src="/handlebars.js"></script>
+<script type="text/javascript" src="/jquery.js"></script>
+
+<!-- 
+    INLINE JAVASCRIPT
+
+    note: better if put as close to the bottom as possible
+<script type="text/javascript">
+</script>
+-->
+
+
+</head>
+<body>
+
+<h1>Handlebars Divs Below</h1>
+
+</body>
+</html>
+
+
+<script type="text/javascript">
+// HANDLEBARS: Initialize the data object
+var data_object = {headerTitle:"Handlebars Test Page", weekDay:"Friday", friendName:"Bob Schmengedozen"};
+
+// Retrieve the HTML from the script tag 
+// We use the id (header) of the script tag to target it on the page
+var templateScript = $("#header").html();
+
+// The Handlebars.compile function returns a function to theTemplate variable
+var template_func = Handlebars.compile(templateScript);
+
+//Use the theTemplate () function returned by the compile function to generate the final string with interpolated object values. We pass the object data as a parameter. Then attach the resulting string with HTML to the page:
+$(document.body).append (template_func(data_object));
+
+//$(document.body).append( $("<pre>").html(template_func(data_object)) );
+$("<pre>").html( encodeURIComponent( template_func(data_object) ) ).appendTo( $(document.body) ); 
+$("<div>").html( template_func(data_object) ).css({'color':'rgb(103, 62, 119)','font-family':'Helvetica,arial,sans-serif'}).appendTo( $(document.body) );
+
+var tagsToReplace = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;'
+};
+
+function replaceTag(tag) {
+    return tagsToReplace[tag] || tag;
+}
+
+function safe_tags_replace(str) {
+    return str.replace(/[&<>]/g, replaceTag);
+}
+
+$("<pre>").html( safe_tags_replace(template_func(data_object) ) ).appendTo( $(document.body) );
+</script>
+

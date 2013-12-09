@@ -6,13 +6,14 @@ var Stream = require('stream');
 
 // lib.config - application internal settings 
 var config = {
-    static_dir: './static',
-    logFileName: './node-server-log.txt'
+    static_dir: 'server/static',
+    logFileName: './node-server-log.txt',
+    server_static_includes: 'server/static-include'
 };
 
 exports.pobj = pobj;
 exports.type_of = type_of;
-exports.config = config;
+exports.default_config = config;
 exports.log = log;
 exports.serve_static = serve_static;
 exports.reportError = reportError;
@@ -47,7 +48,7 @@ function pobj( name_or_obj, obj )
 
     var s = this.name + ' ['+ typeof(this.obj) + ']: ';
     s += _obj_keys(this.obj);
-//    p( s );
+
     return s;
 }
 
@@ -71,6 +72,10 @@ function type_of( t ) {
 
 function log() 
 {
+    if ( !log.started )
+        late_start();
+
+    // write
     if ( arguments.length > 0 ) {
         var args = Array.prototype.slice.call(arguments);
         var date = (new Date()).toUTCString();
@@ -78,19 +83,23 @@ function log()
         log.write( msg );
         //log.print( msg );
     }
+
+    function late_start() {
+        log.started = true;
+        log.writeStdout = true;
+        log.prefix = 'Log: ';
+        //log.print = function(s) { process.stdout.write(s); };
+        log.fileOutStream = fs.createWriteStream( config.logFileName );
+        log.stream = new Stream();
+        log.pipe_func = function(data) {
+            this.fileOutStream.write( data );
+            if ( this.writeStdout )
+                process.stdout.write( data );
+        };
+        log.stream.on( 'data', log.pipe_func.bind(log) );
+        log.write = function( msg ) { this.stream.emit( 'data', msg ); };
+    }
 }
-log.writeStdout = true;
-log.prefix = 'Log: ';
-log.print = function(s) { process.stdout.write(s); };
-log.fileOutStream = fs.createWriteStream( config.logFileName );
-log.stream = new Stream();
-log.pipe_func = function(data) {
-    this.fileOutStream.write( data );
-    if ( this.writeStdout )
-        process.stdout.write( data );
-};
-log.stream.on( 'data', log.pipe_func.bind(log) );
-log.write = function( msg ) { this.stream.emit( 'data', msg ); };
 
 function _mime_from_suffix( file )
 {
