@@ -14,8 +14,11 @@ if ( process.argv.length < 3 ) {
     var app_name = "_default"; // built-in "hello world" project
     var port = 80;
 }
-else
-{
+else if ( process.argv[2] === '-h' || process.argv[2] === '--help' ) {
+    console.log( 'usage: node server.js [application_name] [port]' );
+    process.exit(0);
+}
+else {
     var app_name = process.argv[2];
     var port = parseInt( ((process.argv.length >= 4) ? process.argv[3] : 80), 10 );
 }
@@ -23,12 +26,12 @@ else
 //
 //  setup handler
 //
-handler.setup( app_name ); // looks in app_name/config.js for handler.config path
+handler.setApp( app_name );
 
-//server.setApplication( app_name, path.resolve(__dirname) /* here */ );
-server.setHandler( handler );
-server.setPort( port );
-server.start();
+//
+//  start
+//
+server.start( handler, port );
 
 
 
