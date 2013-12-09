@@ -33,6 +33,10 @@ function setAppDir( app_path )
     config['app_path'] = app_path;
     config['static_dir'] = app_path; // config can still overwrite
 
+    // look for config.js in the application directory. If found,
+    //  overwrite any config directives with ones supplied from it.
+    // Also, most importantly, propagate the handlers from the config.handler
+    //  field
     try { 
         var app_conf_path = path.resolve( app_path, 'config.js' ) ;
         stat = fs.statSync( app_conf_path );
@@ -43,21 +47,16 @@ function setAppDir( app_path )
             }
         }
 
-        if ( config['request'] && config['handler'] ) {
-            var hname = config['handler'];
-            var hpath = path.resolve( app_path, hname ) ;
-            try {
-                stat = fs.statSync( hpath );
-                
-                for ( var uri in config['request'] ) {
-                    if ( config['request'].hasOwnProperty(i) ) {
-                        handlers[uri] = 
-                    }
+        if ( config['handler'] ) {
+            for ( var uri in config['handler'] ) {
+                if ( config['handler'].hasOwnProperty(uri) ) {
+                    handlers[uri] = config['handler'][uri];
                 }
-            } catch(e) {}
+            }
         }
     } catch(e) { 
     }
 }
 exports.setApp = setAppDir;
 exports.handlers = handlers;
+exports.config = config;

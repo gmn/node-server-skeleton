@@ -34,13 +34,3 @@ handler.setApp( app_name );
 server.start( handler, port );
 
 
-
-/* this stuff all happens in handler.js now
-var handlers = {};
-handlers["/"]           = requestHandler.root;
-handlers["/upload"]     = requestHandler.upload;
-
-// and this happens in server.start
-server.start( router.route, handlers );
-*/
-
