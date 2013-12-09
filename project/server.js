@@ -1,7 +1,7 @@
 
-var server = require('./server.js');
-var router = require('./router.js');
-var requestHandler = require("./requestHandler");
+var server = require('./server/server.js');
+var router = require('./server/router.js');
+var requestHandler = require("./server/requestHandler");
 
 var handlers = {};
 handlers["/"]           = requestHandler.root;

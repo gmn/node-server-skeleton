@@ -16,10 +16,11 @@ function start( router, handler, port )
             response.end();
             return true;
         }
-/*
+
+        /*
         if ( examine(request, response) )
             return;
-*/
+        */
 
         router( handler, request, response );
     }
