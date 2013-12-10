@@ -8,8 +8,8 @@ var path = require('path');
 var config = lib.config; 
 
 // URI which get routed to function handlers
-var handlers = {
-
+var handlers = 
+{
     '/about_node_server_skeleton' : function( req, res ) {
         var page = '<!doctype html><html><head><title>Node Server Skeleton - Hello World</title></head><body><h1>Hello World!</h1><br>Node Server Skeleton, &copy; 2013</body></html>';
         res.writeHeader( 200, { "Content-Type": 'text/html' } );
@@ -67,8 +67,14 @@ function setup( unresolved_path )
         stat = fs.statSync( app_conf_path );
         var app_conf = require( app_conf_path ).config;
         for ( var key in app_conf ) {
-            if ( app_conf.hasOwnProperty( key ) ) {
-                config[key] = app_conf[key];
+            if ( app_conf.hasOwnProperty( key ) ) 
+            {
+                // concatenate arrays, adding onto, instead of overwriting, the original
+                if ( lib.type_of( app_conf[key] ) === 'array' && config[key] ) {
+                    config[key] = app_conf[key].concat( config[key] );
+                } else {
+                    config[key] = app_conf[key];
+                }
             }
         }
     } catch(e) { }
@@ -81,6 +87,9 @@ function setup( unresolved_path )
             }
         }
     }
+
+    // call these after config is finished being built
+    lib.late_inits();
 }
 exports.setup = setup;
 exports.handlers = handlers;
