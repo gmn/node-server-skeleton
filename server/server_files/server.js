@@ -18,6 +18,16 @@ function route( handler, req, res )
 
     var handlers = handler.handlers;
 
+    // reset
+    handler.config['get'] = {};
+    handler.config['post'] = {};
+
+    // extract the get
+    if ( pathname.indexOf( '?' ) !== -1 ) {
+        var url = require('url');
+        handler.config['get'] = url.parse( req.url, true ).query;
+    }
+
     // exact match
     if ( handlers && typeof handlers[pathname] === 'function' ) 
         return handlers[pathname].call(lib, req, res );
@@ -37,7 +47,9 @@ function route( handler, req, res )
     // trim off base uri, and try it: "/blog/2011/10/31" -> "/blog"
     var s = req.url ? req.url.trim() : '';
     var base_uri = s.slice(0, s.indexOf('/',1)); // get uri base only to decide handler
-
+    if ( typeof handlers[base_uri] === 'function' )
+        return handlers[base_uri].call(lib, req, res );
+    base_uri = s.slice(0, s.indexOf('?',1));     // also slice off past '?'
     if ( typeof handlers[base_uri] === 'function' )
         return handlers[base_uri].call(lib, req, res );
 
@@ -58,7 +70,6 @@ function start( handler, port )
             return true;
         } 
         */
-
         route( handler, request, response );
     }
 

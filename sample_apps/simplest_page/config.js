@@ -15,9 +15,22 @@ exports.config =
             res.end();
         },
 
+        '/analyze_get' : function( req, res ) {
+            var get = this.config.get;
+            res.writeHead( 200, { 'Content-Type' : 'text/html' } );
+            res.write( '<html><body><h2>Analyze the get</h2><a href="/analyze_get/?q=roses+are+red&a=violets&b=are&c=blue">Try this one</a>' ); 
+            if ( get && this.type_of(get) === 'object' ) {
+                var j = JSON.stringify( get, null, '  ' );
+                res.write( '<pre>'+j+'</pre></body></html>' );
+            } else {
+                res.write( '</body></html>' );
+            }
+            res.end();
+        },
+
         '/show_config' : function( req, res ) {
             res.writeHead( 200, { 'Content-Type' : 'text/plain' } );
-            res.write( this.pobj( this.default_config ) );
+            res.write( this.pobj( this.config ) );
             res.end();
         }
     }

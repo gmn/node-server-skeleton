@@ -5,7 +5,7 @@ var lib = require('./lib');
 var path = require('path');
 
 // default config from lib, gets modified here, and passed to server in handler.
-var config = lib.default_config; 
+var config = lib.config; 
 
 // URI which get routed to function handlers
 var handlers = {

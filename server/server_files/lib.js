@@ -14,7 +14,7 @@ var config = {
 
 exports.pobj = pobj;
 exports.type_of = type_of;
-exports.default_config = config;
+exports.config = config;
 exports.log = log;
 exports.serve_static = serve_static;
 exports.reportError = reportError;
@@ -25,7 +25,7 @@ function _obj_keys(m) {
     var s = '';
     for ( i in m ) {
         if ( m.hasOwnProperty( i ) ) {
-            s += i + ': ' + m[i] + "\n";
+            s += i + ': ' + JSON.stringify(m[i]) + "\n";
         }
     }
     return s;
@@ -36,18 +36,18 @@ function pobj( name_or_obj, obj )
 {
     if ( arguments.length > 1 )
     {
-        this.name = name_or_obj;
+        this.name = name_or_obj + ' [';
         this.obj = obj;
     }
     else if ( arguments.length === 1 )
     {
-        this.name = '';
+        this.name = '[';
         this.obj = name_or_obj;
     }
     else
         return undefined;
 
-    var s = this.name + ' ['+ typeof(this.obj) + ']: ';
+    var s = this.name + typeof(this.obj) + ']: ' + "\n";
     s += _obj_keys(this.obj);
 
     return s;
