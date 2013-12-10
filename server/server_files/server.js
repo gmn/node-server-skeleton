@@ -47,23 +47,22 @@ function route( handler, req, res )
 
 function start( handler, port ) 
 {
-debugger;
-    var listening_port = port || 8000;
-    handler.config.port = listening_port;
-
     function onRequest(request, response) 
     {
+        /* useful for debugging
         function examine(req,res) {
             var s = 'REQ:'+lib.pobj(req) + "\n<br><br>\nRES:" + lib.pobj(res);
             response.writeHead(200, {"Content-Type": "text/html"});
             response.write('<pre>'+s+'</pre>');
             response.end();
             return true;
-        }
+        } 
+        */
 
         route( handler, request, response );
     }
 
+    var listening_port = handler.config.port = port || 8000;
     http.createServer(onRequest).listen(listening_port);
     lib.log('Server "'+handler.config.server_name+'" started. Listening on port: ' + listening_port );
 }

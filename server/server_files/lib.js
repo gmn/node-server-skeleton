@@ -9,7 +9,7 @@ var config = {
     static_dir: 'static-includes',
     logFileName: './node-server-log.txt',
     server_static_dir: 'static-includes',
-    search_list: ['index.html','index.js','index.php']
+    search_list: ['index.html','index.htm','index.js','default.html']
 };
 
 exports.pobj = pobj;
@@ -124,8 +124,7 @@ function serve_static( req, res )
     if ( file[0] !== '/' )
         file = '/' + file;
 
-debugger;
-    // may be resolve already (if it is we won't worry about server directory)
+    // may be resolved already (if it is we won't worry about server directory)
     if ( file.indexOf( config.static_dir ) === 0 )
         var ap_file = file;
     else
