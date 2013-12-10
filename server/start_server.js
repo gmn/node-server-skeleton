@@ -1,9 +1,10 @@
 // start_server.js
 
 var path = require('path');
-var server = require('./server/server.js');
-var handler = require( './server/handler.js' );
+var server = require('./server_files/server.js');
+var handler = require( './server_files/handler.js' );
 
+var default_port = 8000;
 
 // 
 //  determine which app 
@@ -24,7 +25,7 @@ else if ( process.argv[2] === '-h' || process.argv[2] === '--help' ) {
 }
 else {
     var app_directory = process.argv[2];
-    var port = parseInt( ((process.argv.length >= 4) ? process.argv[3] : 80), 10 );
+    var port = parseInt( ((process.argv.length >= 4) ? process.argv[3] : default_port), 10 );
 }
 
 //
