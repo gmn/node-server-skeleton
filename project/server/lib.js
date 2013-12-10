@@ -8,7 +8,8 @@ var Stream = require('stream');
 var config = {
     static_dir: 'static-includes',
     logFileName: './node-server-log.txt',
-    server_static_dir: 'static-includes'
+    server_static_dir: 'static-includes',
+    search_list: ['index.html','index.js','index.php']
 };
 
 exports.pobj = pobj;

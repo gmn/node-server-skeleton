@@ -9,7 +9,6 @@ exports.route = route;
 
 function route( handler, req, res ) 
 {
-debugger;
     //
     // analyze req & res here
     //
@@ -25,13 +24,14 @@ debugger;
 
     // if pathname ends in '/', check for index.html in directory, if found, serve it
     if ( pathname[pathname.length-1] === '/' ) {
-        var index_file = pathname + 'index.html';
-        try {
-            var index_resolved = path.resolve( handler.config.static_dir + index_file );
-            var stat = fs.statSync( index_resolved );
-debugger;
-            return lib.serve_static( index_resolved, res );
-        } catch(e) { }
+        for ( var i = 0, l = handler.config.search_list.length; i < l; i++ ) {
+            var index_file = pathname + handler.config.search_list[i];
+            try {
+                var index_resolved = path.resolve( handler.config.static_dir + index_file );
+                var stat = fs.statSync( index_resolved );
+                return lib.serve_static( index_resolved, res );
+            } catch(e) { }
+        }
     }
 
     // trim off base uri, and try it: "/blog/2011/10/31" -> "/blog"
