@@ -45,8 +45,7 @@ function setAppDir( unresolved_path )
             script_name = path.basename( process.argv[2] );
             script_dir = path.dirname( process.argv[2] );
         }
-
-        config['server_dir'] = script_dir + '/server/'; 
+        config['server_dir'] = script_dir + '/server_files/'; // TODO: auto-detect files_dir in case it gets changed
         config['server_static_dir'] = config['server_dir'] + config['server_static_dir'] ;
     }
 
