@@ -6,9 +6,9 @@ var Stream = require('stream');
 
 // lib.config - application internal settings 
 var config = {
-    static_dir: 'server/static-includes',
+    static_dir: 'static-includes',
     logFileName: './node-server-log.txt',
-    server_static_dir: 'server/static-includes'
+    server_static_dir: 'static-includes'
 };
 
 exports.pobj = pobj;
@@ -121,13 +121,53 @@ function serve_static( req, res )
     var file = ( type_of(req) === 'string' ) ? req : req.url;
 
     if ( file[0] !== '/' )
-        file = '/'+file;
+        file = '/' + file;
 
-    var file = path.normalize( config.static_dir + file );
+debugger;
+    var ap_file = path.normalize( config.static_dir + file );
+    log('Serving static file: "'+ap_file+'"');
+    try {
+        var stat = fs.statSync( ap_file );
+        if (stat.isDirectory()) {
+            res.writeHead(403); 
+            res.end('Forbidden');
+            return;
+        } 
 
-    log('Serving static file: "'+file+'"');
+        // is ok, serve it
+        return serve_file( ap_file, res );
 
-    fs.exists(file, function(exists) {
+    } catch(e) {
+        var serv_file = path.normalize( config.server_static_dir + file );
+        log('Trying server static file: "'+serv_file+'"');
+        try { 
+            stat = fs.statSync( serv_file );
+            if (stat.isDirectory()) {
+                res.writeHead(403); 
+                res.end('Forbidden');
+                return;
+            } 
+
+            // serve it!
+            return serve_file( serv_file, res );
+
+        } catch(e) {
+            log( '"'+file+'" sending 404, File not found' );
+            res.writeHead(404);
+            res.end('"'+file+'" Not found on this server');
+        }
+    }
+
+    function serve_file( file, res ) {
+        var mime = _mime_from_suffix(file);
+        var rs = fs.createReadStream(file);
+        rs.on('error', reportError.bind(null,res) );
+        res.writeHead(200, {"Content-Type": mime });
+        rs.pipe(res);
+    }
+
+/*
+    fs.exists(ap_file, function(exists) {
         if (exists) {
             fs.stat(file, function(err, stat) {
                 if (err) {
@@ -139,19 +179,16 @@ function serve_static( req, res )
                     res.end('Forbidden');
                 } else {
                     // determine kind of file so we can include correct headers
-                    var mime = _mime_from_suffix(file);
-                    var rs = fs.createReadStream(file);
-                    rs.on('error', reportError.bind(null,res) );
-                    res.writeHead(200, {"Content-Type": mime });
-                    rs.pipe(res);
                 }
             });
         } else {
-            log( "404, File not found" );
+            
+            log( '"'+file+'" gives 404, File not found" );
             res.writeHead(404);
             res.end('"'+path.basename(file)+'" Not found on this server');
         }
     });
+*/
 }
 
 function _ls_dir ( dir_path, set )

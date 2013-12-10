@@ -38,8 +38,17 @@ function setAppDir( unresolved_path )
     config['server_name'] = path.basename( app_path ); // set here. can set to something better in config.js
 
     // fix server_static_dir
-    if ( config['server_static_dir'] )
-        config['server_static_dir'] = path.resolve( config['server_static_dir'] );
+    if ( config['server_static_dir'] ) {
+        var script_name = path.basename( process.argv[1] );
+        var script_dir = path.dirname( process.argv[1] );
+        if ( script_name === 'debug' ) {
+            script_name = path.basename( process.argv[2] );
+            script_dir = path.dirname( process.argv[2] );
+        }
+
+        config['server_dir'] = script_dir + '/server/'; 
+        config['server_static_dir'] = config['server_dir'] + config['server_static_dir'] ;
+    }
 
     // can pass config object as optional 2nd argument  
     if ( arguments.length > 1 && lib.type_of(arguments[1]) === 'object' ) {
