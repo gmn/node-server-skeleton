@@ -75,6 +75,6 @@ function start( handler, port )
 
     var listening_port = handler.config.port = port || 8000;
     http.createServer(onRequest).listen(listening_port);
-    lib.log('Server "'+handler.config.server_name+'" started. Listening on port: ' + listening_port );
+    lib.log('Server "'+handler.config.application_name+'" started. Listening on port: ' + listening_port );
 }
 

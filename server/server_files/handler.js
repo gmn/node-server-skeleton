@@ -18,7 +18,8 @@ var handlers = {
     }
 };
 
-function setAppDir( unresolved_path )
+// can also pass config as 2nd argument: {object}
+function setup( unresolved_path )
 {
     try {
         var app_path = path.resolve( unresolved_path );
@@ -35,7 +36,7 @@ function setAppDir( unresolved_path )
 
     config['app_path'] = app_path;
     config['static_dir'] = app_path; // config can still overwrite
-    config['server_name'] = path.basename( app_path ); // set here. can set to something better in config.js
+    config['application_name'] = path.basename( app_path ); // set here. can set to something better in config.js
 
     // fix server_static_dir
     if ( config['server_static_dir'] ) {
@@ -81,6 +82,6 @@ function setAppDir( unresolved_path )
         }
     }
 }
-exports.setApp = setAppDir;
+exports.setup = setup;
 exports.handlers = handlers;
 exports.config = config;

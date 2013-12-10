@@ -31,7 +31,7 @@ else {
 //
 //  setup handler
 //
-handler.setApp( app_directory );
+handler.setup( app_directory /* can also set config here: ,{name:value}*/ );
 
 //
 //  start
