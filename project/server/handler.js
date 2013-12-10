@@ -9,8 +9,8 @@ var config = lib.default_config;
 
 // URI which get routed to function handlers
 var handlers = {
-    // default handler
-    '/' : function( req, res ) {
+
+    '/about_node_server_skeleton' : function( req, res ) {
         var page = '<!doctype html><html><head><title>Node Server Skeleton - Hello World</title></head><body><h1>Hello World!</h1><br>Node Server Skeleton, &copy; 2013</body></html>';
         res.writeHeader( 200, { "Content-Type": 'text/html' } );
         res.write( page );

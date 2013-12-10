@@ -124,7 +124,12 @@ function serve_static( req, res )
         file = '/' + file;
 
 debugger;
-    var ap_file = path.normalize( config.static_dir + file );
+    // may be resolve already (if it is we won't worry about server directory)
+    if ( file.indexOf( config.static_dir ) === 0 )
+        var ap_file = file;
+    else
+        var ap_file = path.normalize( config.static_dir + file );
+
     log('Serving static file: "'+ap_file+'"');
     try {
         var stat = fs.statSync( ap_file );
@@ -154,7 +159,7 @@ debugger;
         } catch(e) {
             log( '"'+file+'" sending 404, File not found' );
             res.writeHead(404);
-            res.end('"'+file+'" Not found on this server');
+            res.end('"'+path.basename(file)+'" Not found on this server');
         }
     }
 

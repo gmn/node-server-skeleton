@@ -1,5 +1,7 @@
 var http = require("http"),
-    lib = require('./lib');
+    lib = require('./lib'),
+    fs = require('fs'),
+    path = require( 'path' );
 
 exports.start = start;
 exports.route = route;
@@ -20,6 +22,17 @@ debugger;
     // exact match
     if ( handlers && typeof handlers[pathname] === 'function' ) 
         return handlers[pathname].call(lib, req, res );
+
+    // if pathname ends in '/', check for index.html in directory, if found, serve it
+    if ( pathname[pathname.length-1] === '/' ) {
+        var index_file = pathname + 'index.html';
+        try {
+            var index_resolved = path.resolve( handler.config.static_dir + index_file );
+            var stat = fs.statSync( index_resolved );
+debugger;
+            return lib.serve_static( index_resolved, res );
+        } catch(e) { }
+    }
 
     // trim off base uri, and try it: "/blog/2011/10/31" -> "/blog"
     var s = req.url ? req.url.trim() : '';
