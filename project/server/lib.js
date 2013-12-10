@@ -6,9 +6,9 @@ var Stream = require('stream');
 
 // lib.config - application internal settings 
 var config = {
-    static_dir: 'server/static',
+    static_dir: 'server/static-includes',
     logFileName: './node-server-log.txt',
-    server_static_includes: 'server/static-include'
+    server_static_dir: 'server/static-includes'
 };
 
 exports.pobj = pobj;

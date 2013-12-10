@@ -37,6 +37,10 @@ function setAppDir( unresolved_path )
     config['static_dir'] = app_path; // config can still overwrite
     config['server_name'] = path.basename( app_path ); // set here. can set to something better in config.js
 
+    // fix server_static_dir
+    if ( config['server_static_dir'] )
+        config['server_static_dir'] = path.resolve( config['server_static_dir'] );
+
     // can pass config object as optional 2nd argument  
     if ( arguments.length > 1 && lib.type_of(arguments[1]) === 'object' ) {
         var o = arguments[1];
@@ -61,10 +65,10 @@ function setAppDir( unresolved_path )
     } catch(e) { }
 
     // propagate the handlers from the config.handler field
-    if ( config['handler'] ) {
-        for ( var uri in config['handler'] ) {
-            if ( config['handler'].hasOwnProperty(uri) ) {
-                handlers[uri] = config['handler'][uri];
+    if ( config['handlers'] ) {
+        for ( var uri in config['handlers'] ) {
+            if ( config['handlers'].hasOwnProperty(uri) ) {
+                handlers[uri] = config['handlers'][uri];
             }
         }
     }
