@@ -73,7 +73,13 @@ function setup( unresolved_path )
                 if ( lib.type_of( app_conf[key] ) === 'array' && config[key] ) {
                     config[key] = app_conf[key].concat( config[key] );
                 } else {
-                    config[key] = app_conf[key];
+                    switch (key) {
+                    case 'static_dir': 
+                        config[key] = path.resolve( app_conf[key] );
+                        break;
+                    default:
+                        config[key] = app_conf[key];
+                    }
                 }
             }
         }

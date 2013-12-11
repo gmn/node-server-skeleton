@@ -1,11 +1,35 @@
 var path = require( 'path' ),
     http = require( 'http' ),
     lib = require( './lib' ),
-    fs = require( 'fs' );
+    fs = require( 'fs' ),
+    qs = require( 'querystring' );
 //    url = require( 'url '),
 
 exports.start = start;
 exports.route = route;
+
+
+// parse the post here, turn into object, attach 
+function _processPost(request, response, callback) 
+{
+    var post_data = "";
+    if (typeof callback !== 'function') return null;
+
+    if ( request.method == 'POST' ) {
+        request.on('data', function(data) {
+            post_data += data;
+        });
+
+        request.on('end', function() {
+            callback( post_data );
+        });
+    } else {
+        response.writeHead(405, {'Content-Type': 'text/plain'});
+        response.end('405');
+    }
+}
+
+
 
 
 function route( handler, req, res ) 
@@ -23,6 +47,7 @@ function route( handler, req, res )
     handler.config['get'] = {};
     handler.config['post'] = {};
     delete handler.config.current_handler;
+
 
     // block requests for files that match names in this list
     var basename = path.basename( pathname ).toLowerCase();
@@ -43,6 +68,21 @@ function route( handler, req, res )
         return lib.forbidden_request( res, pathname /* for logs */ );
     }
 
+
+    // wrap the post callbacks or simply call the get responder
+    function server_response( responder_func ) 
+    {
+        if ( req.method == 'POST' ) {
+            _processPost(req, res, function( postString ) {
+                handler.config.post = qs.parse( postString );
+                responder_func( req, res, lib );
+            });
+        }
+        else
+            responder_func( req, res, lib );
+    }
+
+
     // extract the get
     if ( pathname.indexOf( '?' ) !== -1 ) {
         var url = require('url');
@@ -52,7 +92,7 @@ function route( handler, req, res )
     // exact match
     if ( handlers && typeof handlers[pathname] === 'function' ) {
         handler.config.current_handler = pathname;
-        return handlers[pathname]( req, res, lib );
+        return server_response( handlers[pathname] );
     }
 
     // if pathname ends in '/', check for index.html in directory, if found, serve it
@@ -75,13 +115,13 @@ function route( handler, req, res )
     var base_uri = s.slice(0, s.indexOf('/',1)); // get uri base only to decide handler
     if ( typeof handlers[base_uri] === 'function' ) {
         handler.config.current_handler = base_uri;
-        return handlers[base_uri]( req, res, lib );
+        return server_response( handlers[base_uri] );
     }
 
     base_uri = s.slice(0, s.indexOf('?',1));     // also slice off before '?'
     if ( typeof handlers[base_uri] === 'function' ) {
         handler.config.current_handler = base_uri;
-        return handlers[base_uri]( req, res, lib );
+        return server_response( handlers[base_uri] );
     }
 
     // didn't match handlers, try static_file uri; it will report if file not found
@@ -102,6 +142,7 @@ function start( handler, port )
             return true;
         } 
         //return examine( request, response ); 
+
 
         route( handler, request, response );
     }

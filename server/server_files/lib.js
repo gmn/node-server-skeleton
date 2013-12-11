@@ -73,6 +73,7 @@ exports.boilerplate = boilerplate;
 exports.late_inits = late_inits;
 exports.split_url = split_url;
 exports.get_url = get_url;
+exports.replace_tags = replace_tags;
 
 // function names beginning with underscore not exported
 function _obj_keys( obj, level ) {
@@ -363,5 +364,19 @@ function get_url( url, callback )
             callback(returnstring);
         });
     }).end();
+}
+
+var _tagsToReplace = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;'
+};
+
+function _replaceTag(tag) {
+    return _tagsToReplace[tag] || tag;
+}
+
+function replace_tags(str) {
+    return str.replace(/[&<>]/g, _replaceTag);
 }
 
