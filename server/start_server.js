@@ -31,7 +31,7 @@ else {
 //
 //  setup handler
 //
-handler.setup( app_directory /* can also set config here: ,{name:value}*/ );
+handler.setup( app_directory /* can also pass config obj as arg2 */ );
 
 //
 //  start

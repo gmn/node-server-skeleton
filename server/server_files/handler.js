@@ -75,7 +75,7 @@ function setup( unresolved_path )
                 } else {
                     switch (key) {
                     case 'static_dir': 
-                        config[key] = path.resolve( app_conf[key] );
+                        config[key] = path.resolve( app_path, app_conf[key] );
                         break;
                     default:
                         config[key] = app_conf[key];

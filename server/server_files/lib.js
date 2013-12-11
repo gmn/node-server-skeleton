@@ -159,7 +159,7 @@ log.start = function () {
     log.started = true;
     log.writeStdout = true;
     log.prefix = 'Log: ';
-    log.fileOutStream = fs.createWriteStream( config.logFileName );
+    log.fileOutStream = fs.createWriteStream( config.logFileName, {flags:'a'} );
     log.stream = new Stream();
     log.pipe_func = function(data) {
         this.fileOutStream.write( data );
