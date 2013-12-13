@@ -3,7 +3,7 @@
 // most commonly requested types: (basically the ones below).  If its not found in
 // that table, resort to loading and searching in the large table.
 
-var mimes = require('../project/mime');
+var mimes = require('../server/server_files/mime');
 var validExtensions = {
     ".html" : "text/html",          
     ".js": "application/javascript", 
