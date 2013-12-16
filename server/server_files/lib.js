@@ -4,6 +4,7 @@ var mime = require('./mime.js'),
     Stream = require('stream'),
     path = require('path'),
     http = require('http'),
+    https = require('https'),
     fs = require('fs');
 
 
@@ -339,23 +340,39 @@ function split_url(url)
     do {
         i = url.indexOf('/', i + 2);
     } while ( i !== -1 && i+2 < url.length && url[i+1] === '/' );
-    return [ url.substring(0,i), url.substring(i) ];
+    var o = [ url.substring(0,i), url.substring(i), '/' ];
+    if ( ! o[0].trim() ) { // empty
+        o.shift();
+    }
+    return o;
 }
 
 function get_url( url, callback ) 
 {
+    var is_https = false;
+
+    // if url has leading 'http://' or 'https://'
+    if ( url.indexOf( 'http://' ) === 0 ) {
+        url = url.substring( 7 );
+    } else if ( url.indexOf( 'https://' ) === 0 ) {
+        url = url.substring( 8 );
+        is_https = true;
+    }
+
     var url_components = split_url(url);
 
     var options = {
         host: url_components[0],
-        port: 80,
+        port: (is_https ? 443 : 80),
         path: url_components[1],
         method: "GET"
     };
 
     var returnstring = '';
 
-    http.request(options, function(response) {
+    var server_mod = is_https ? https : http;
+
+    server_mod.request(options, function(response) {
         response.setEncoding('utf8');
         response.on('data', function(data) {
             returnstring += data;
