@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<script src="/jquery.js"></script>
+<script src="/pager.js"></script>
+</head>
+<body>
+
+<center><h1>Node Server Skeleton Pager Test</h1></center>
+<br>
+
+<div style="width:90%;border:1px solid black;min-height:400px;padding:10px;margin:4px auto;">
+    <div id="tdiv"></div>
+</div>
+
+</body>
+</html>
+
+<script>
+$.ajax({
+    url: '/ajax_handler',
+    type:"POST",
+    data: {},
+    dataType: "json",
+    success: function(json){
+        var t = new CTable(json);
+        $("#tdiv").html( t.html() );
+//        alert( JSON.stringify(json) );
+    }
+});
+</script>
+
