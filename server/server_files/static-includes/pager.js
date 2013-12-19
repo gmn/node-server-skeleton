@@ -1,20 +1,5 @@
 // basic table pager
 
-/* 
-    WANT:
-        X ability to set entire rows from [Array]
-        - automatic header link generation (see gradapp internal page) if headers are provided
-        - automatic table building from hierarchical JSON
-        - ability to fully style and set custom sorting functions for each column
-        - runs easily in the browser
-            $.ajax(someurl,function(retjson){
-                var T = new CTable( retjson, {table:{css:pairs},td:{css:pairs},tr:...,th:...} );
-                $("#tdiv").html( T.html() );
-            });
-*/
-
-// make available in local scope if neither node.js module or browser
-
 // namespace
 var ctable = (function(ctable){
 
@@ -38,13 +23,16 @@ var ctable = (function(ctable){
         }
     };
 
-    function CTable( json, css )
+    function CTable( json, style )
     {
         this.cur_row = -1;
         this.rows = [];
         this.headers = [];
         this.pad_output = true; // not using
         this.id = this.auto_id();
+        this['class'] = null;
+        this['parent'] = null;
+        this.direction = []; // true is descending
 
         // for table wide definitions:
         // structure, can be any of: { "table":{},"th":{},"tr":{},"td":{} } 
@@ -54,13 +42,12 @@ var ctable = (function(ctable){
         if ( json ) {
             this.loadJSON(json);
         }
-        if ( css ) {
-            this.loadCSS(css);
+        if ( style ) {
+            this.loadCSS(style);
         }
 
         ctables.push(this);        
         this.index = ctables.length - 1;
-        this.direction = false; // true is descending
     }
 
     CTable.prototype = 
@@ -105,36 +92,51 @@ var ctable = (function(ctable){
         },
 
         html: function( header ) {
-            var c = this.getStyle( 'table' );
+            if ( this.direction.length === 0 ) { // late loading
+                var n = 0;
+                this.rows.forEach(function(row) {
+                    if ( row.length > n )
+                        n = row.length; // set as many directions as the longest row
+                });
+                var i = 0;
+                while ( i++ < n ) 
+                    this.direction.push(true);
+            }
+            var ts = this.getStyle( 'table' );
             var id = ' id="'+this.id+'"';
+            var c = this['class'] ? ' class="'+this['class']+'"' : '';
             // allow explicitly set styles to trump Object styles
-            var s = header ? '<table'+id+c+' ' + header + " >\n" : "<table"+id+c+">\n" ;
+            var s = header ? '<table'+id+c+ts+' ' + header + " >\n" : "<table"+id+c+ts+">\n" ;
+            s += this.innerHtml();
+            return s + "</table>\n";
+        },
 
-            var that = this;
-            c = this.getStyle('tr');
+        innerHtml: function() 
+        {
+            var s = '';
+            var tr = this.getStyle('tr');
 
             // <th> row
-            var h = this.getStyle('th');
+            var th = this.getStyle('th');
             if ( this.headers.length > 0 ) 
-                s += "  <tr"+c+">\n";
+                s += "  <tr"+tr+">\n";
             for ( var i = 0; i < this.headers.length; i++ ) {
-                s += "    <th"+h+" onclick=\"sortCTable("+this.index+","+i+")\">"+this.headers[i]+"</th>\n";
+                s += "    <th"+th+" onclick=\"sortCTable("+this.index+","+i+")\"><a href=\"javascript:void(0)\">"+this.headers[i]+"</a></th>\n";
             }
             if ( this.headers.length > 0 ) 
                 s += "  </tr>\n";
 
-
             // <tr><td> rows
-            var d = this.getStyle('td');
+            var td = this.getStyle('td');
             this.rows.forEach(function(row) {
-                s += "  <tr"+c+">\n";
+                s += "  <tr"+tr+">\n";
                 row.data.forEach(function(col) {
-                    s += "    <td"+d+">"+col+"</td>\n";
+                    s += "    <td"+td+">"+col+"</td>\n";
                 } );
                 s += "  </tr>\n";
             });
 
-            return s + "</table>\n";
+            return s;
         },
 
         sort_by: function( col, desc ) 
@@ -150,9 +152,9 @@ var ctable = (function(ctable){
         },
 
         loadJSON: function(j) {
-            // structure. either are optional: { "table" : [ [ ] ], "css" : {} }
+            // structure. either are optional: { "table":[[]], "style":{}, "class":"" }
             //  OR
-            // structure: { "table":{"th":[e,e,e],"tbody":[[a,b,c],[d,e,f]] }, "css":{} }
+            // structure: { "table":{"th":[e,e,e],"tbody":[[a,b,c],[d,e,f]] }, "style":{}, "class":"" }
             if ( j && typeof j === 'string' ) 
                 j = JSON.parse(j);
             
@@ -168,18 +170,22 @@ var ctable = (function(ctable){
 
                 if ( typeof table === "object" && table.th ) 
                     this.headers = table.th;
-
             }
-            if ( j && j.css ) {
-                this.loadCSS(j.css);
+
+            if ( j && j.style ) {
+                this.loadCSS(j.style);
+            }
+
+            if ( j && j['class'] ) {
+                this['class'] = j['class'];
             }
         },
 
-        loadCSS: function(css) {
+        loadCSS: function(style) {
             // structure, can be any of: { "table":{},"th":{},"tr":{},"td":{} }, for table wide definitions.
             // for specific rows & columns: { "x": ... err, not sure
-            if ( typeof css === 'object' && (css.table || css.th || css.tr || css.td) )
-                this.styles = css;
+            if ( typeof style === 'object' && (style.table || style.th || style.tr || style.td) )
+                this.styles = style;
         },
 
         // get style information for a certain key, and format as => 'style="key1:val1;key2:val2;"'
@@ -193,7 +199,7 @@ var ctable = (function(ctable){
                         c += i+':'+t[i]+';';   
                     }
                 }
-                c += '" ';
+                c += '"';
             }
             return c;
         },
@@ -216,23 +222,28 @@ var ctable = (function(ctable){
                 return num.reverse().join('');
             }
             var r = Math.floor(Math.random()*10000000);
-            //return '_' + base_convert( r, 16 );
-            //return '_' + base_convert( r, 16 );
-            return 'T'+  base_convert( r, 16 );
+            return '_T'+  base_convert( r, 16 );
         },
 
-        toggleDirection: function () {   
-            this.direction = !this.direction;
-            return this.direction;
+        toggleDirection: function ( c ) {   
+            this.direction[c] = !this.direction[c];
+            return this.direction[c];
+        },
+
+        setParent: function(p) {
+            this['parent'] = p;
         }
+
     }; //CTable.prototype
 
     function sortCTable( index, col ) 
     {
-        alert( index + ' ' + col );
         var table = this.ctables[index];
-        table.sort_by(col,table.toggleDirection());
-        
+        table.sort_by(col, table.toggleDirection( col ) );
+        if ( window.$ )
+            $("#"+table.id).html( table.innerHtml() );
+        else if ( table['parent'] ) 
+            table['parent'].innerHtml = table.html();
     }
 
     ctable.CTable = CTable;
@@ -288,15 +299,14 @@ t2.dprint(' ','');
 */
 
 /* test 3
-//var json = JSON.parse( '{"table":[[1,2,3,4],["a","b","c","d"]],"css":{"table":{"border":"2px dashed red","background-color":"#909"}}}' );
-var json = JSON.parse('{"table":[[1,2,3,4],["a","b","c","d"]],"css":{"table":{"border":"2px dashed brown","padding":"10px"},"td":{"padding":"8px","font-weight":"bold","border":"1px solid #bbb"}}}' );
+//var json = JSON.parse( '{"table":[[1,2,3,4],["a","b","c","d"]],"style":{"table":{"border":"2px dashed red","background-color":"#909"}}}' );
+var json = JSON.parse('{"table":[[1,2,3,4],["a","b","c","d"]],"style":{"table":{"border":"2px dashed brown","padding":"10px"},"td":{"padding":"8px","font-weight":"bold","border":"1px solid #bbb"}}}' );
 var t = new CTable(json);
 console.log( "\n" + t.html() );
 */
 
-/* test 4
-var t = new CTable( '{"table":{"th":["one","two","three","four"],"tbody":[[1,2,"a","f","b"],[6,4,"c","d","e"]]},"css":{"table":{"border":"1px solid brown","padding":"3px","margin":"5px"},"td":{"padding":"8px","font-weight":"bold","border":"1px solid #bbb"},"th":{"font-style":"italic","font-weight":"normal"}}}' );
+// test 4
+/*
+var t = new CTable( '{"table":{"th":["one","two","three","four"],"tbody":[[1,2,"a","f","b"],[6,4,"c","d","e"]]},"style":{"table":{"border":"1px solid brown","padding":"3px","margin":"5px"},"td":{"padding":"8px","font-weight":"bold","border":"1px solid #bbb"},"th":{"font-style":"italic","font-weight":"normal"}},"class":"htable"}' );
 console.log( "\n" + t.html() );
 */
-
-

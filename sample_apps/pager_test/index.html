@@ -24,8 +24,8 @@ $.ajax({
     dataType: "json",
     success: function(json){
         var t = new CTable(json);
+        //t.setParent( $("#tdiv") );
         $("#tdiv").html( t.html() );
-//        alert( JSON.stringify(json) );
     }
 });
 </script>
