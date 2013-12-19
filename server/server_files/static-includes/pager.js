@@ -163,10 +163,11 @@ var ctable = (function(ctable){
                 var that = this;
 
                 var rows = typeof table === "object" && table.tbody ? table.tbody : table;
-
-                rows.forEach(function(row){
-                    that.add_row.call(that,row);
-                });
+                if ( rows instanceof Array ) {
+                    rows.forEach(function(row){
+                        that.add_row.call(that,row);
+                    });
+                }
 
                 if ( typeof table === "object" && table.th ) 
                     this.headers = table.th;
