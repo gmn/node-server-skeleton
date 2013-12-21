@@ -321,6 +321,10 @@ function boilerplate( which, arg1, arg2 )
         return '<!doctype html>\n<html>\n<head>\n <title>'+ap_name+'</title>\n</head>\n\n <body>\n';
     case 'title':
         return '<!doctype html>\n<html>\n<head>\n <title>'+ap_name+'</title>\n';
+    case 'script':
+        return '<script type="text/javascript" src="'+arg1+"\"></script>\n";
+    case 'style':
+        return '<link rel="stylesheet" type="text/css" href="'+arg1+"\">\n";
     case 'close':
     case 'close_html':
     case 'end':
@@ -395,5 +399,50 @@ function _replaceTag(tag) {
 
 function replace_tags(str) {
     return str.replace(/[&<>]/g, _replaceTag);
+}
+
+function pretty_int( n, decimal_places ) {
+debugger;
+    if ( typeof str !== 'number' ) {
+        n = parseFloat( n, 10 );
+    }
+    if ( typeof n !== 'number' ) {
+        return '-777';
+    }
+
+    //after all that trouble we convert to string
+    var s = n + '';
+
+    if ( decimal_places === undefined )
+        decimal_places = 2;
+
+    var end = s.lastIndexOf('.');
+
+    if ( end === -1 )
+        end = s.length;
+    
+    var a = [];
+    for ( var j = 0; j < end; j++ ) {
+        a.push ( s[j] );
+    }
+
+    a = a.reverse();
+    var b = [];
+    for ( var i = 0; i < a.length; i++ ) {
+        if ( i % 3 === 0 && i !== 0 ) {
+            b.push(',');
+        }
+        b.push( a[i] );
+    }
+    a = b.reverse();
+
+    var floor = Math.floor( n );
+    
+    if ( floor === n )
+        var decimal_string = '.000000000000000000000000000';
+    else
+        var decimal_string = (( n - floor ) +'').substring(1);
+    
+    return a.join('') + decimal_string.substring( 0, decimal_places + 1 );
 }
 
