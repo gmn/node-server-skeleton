@@ -18,8 +18,10 @@ var ctable = (function(ctable){
         add: function(  val, sort_special ) {
             this.data.push( val );
             if ( arguments.length > 1 && sort_special ) {
-                this.sort.push( sort_special );
+                this.sort.push( sort_special ); // if set, sort by this instead of data
             }
+            else
+                this.sort.push( null );
         }
     };
 
@@ -73,7 +75,10 @@ var ctable = (function(ctable){
                 this.new_row();
                 var that = this;
                 ary.forEach(function(x) {
-                    that.rows[that.cur_row].add(x);
+                    if ( x instanceof Array )
+                        that.rows[that.cur_row].add(x[0],x[1]); // sort is passed by JSON as length==2 Array
+                    else
+                        that.rows[that.cur_row].add(x);
                 });
             }
             else /* failover to add() if not Array */
@@ -121,7 +126,10 @@ var ctable = (function(ctable){
             if ( this.headers.length > 0 ) 
                 s += "  <tr"+tr+">\n";
             for ( var i = 0; i < this.headers.length; i++ ) {
-                s += "    <th"+th+" onclick=\"sortCTable("+this.index+","+i+")\"><a href=\"javascript:void(0)\">"+this.headers[i]+"</a></th>\n";
+                // is there a fundamental difference/reason why to use href="function()" over onclick="function()" ?
+
+                //s += "    <th"+th+" onclick=\"sortCTable("+this.index+","+i+")\"><a href=\"javascript:void(0)\">"+this.headers[i]+"</a></th>\n";
+                s += "    <th"+th+"><a href=\"javascript:sortCTable("+this.index+","+i+")\">"+this.headers[i]+"</a></th>\n";
             }
             if ( this.headers.length > 0 ) 
                 s += "  </tr>\n";
@@ -143,11 +151,16 @@ var ctable = (function(ctable){
         {
             var direction = desc ? -1 : 1;
 
-            this.rows.sort(function(a,b) {
-                if ( typeof a.data[col] === "string" && typeof b.data[col] === "string" )
-                    return a.data[col].localeCompare(b.data[col]) * direction;
+            this.rows.sort(function(a,b) 
+            {
+debugger;
+                // sort by these when they are (optionally) set
+                var sorting = ( a.sort[col] && b.sort[col] ) ? 'sort' : 'data';
+
+                if ( typeof a[sorting][col] === "string" && typeof b[sorting][col] === "string" )
+                    return a[sorting][col].localeCompare(b[sorting][col]) * direction;
                 else
-                    return a.data[col] > b.data[col] ? direction : -direction;
+                    return a[sorting][col] > b[sorting][col] ? direction : -direction;
             });
         },
 
@@ -311,3 +324,15 @@ console.log( "\n" + t.html() );
 var t = new CTable( '{"table":{"th":["one","two","three","four"],"tbody":[[1,2,"a","f","b"],[6,4,"c","d","e"]]},"style":{"table":{"border":"1px solid brown","padding":"3px","margin":"5px"},"td":{"padding":"8px","font-weight":"bold","border":"1px solid #bbb"},"th":{"font-style":"italic","font-weight":"normal"}},"class":"htable"}' );
 console.log( "\n" + t.html() );
 */
+
+/* test 5 - sortable
+debugger;
+var table = new CTable( '{"table":[[["<a href=\\"http://a.com/1\\">1</a>",1],2,"b"],[["<a href=\\"http://2\\">2</a>",2],3,"c"], [["<a href=\\"http://a.com/10\\">10</a>",10],1,"a"]] }' );
+table.sort_by(0, table.toggleDirection( 0 ) );
+console.log( "\n" + table.html() );
+table.sort_by(0, table.toggleDirection( 0 ) );
+console.log( "\n" + table.html() );
+table.sort_by(0, table.toggleDirection( 0 ) );
+console.log( "\n" + table.html() );
+*/
+

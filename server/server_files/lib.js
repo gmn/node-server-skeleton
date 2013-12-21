@@ -75,6 +75,7 @@ exports.late_inits = late_inits;
 exports.split_url = split_url;
 exports.get_url = get_url;
 exports.replace_tags = replace_tags;
+exports.pretty_int = pretty_int;
 
 // function names beginning with underscore not exported
 function _obj_keys( obj, level ) {
@@ -443,6 +444,6 @@ debugger;
     else
         var decimal_string = (( n - floor ) +'').substring(1);
     
-    return a.join('') + decimal_string.substring( 0, decimal_places + 1 );
+    return a.join('') + (decimal_places !== 0 ? decimal_string.substring( 0, decimal_places + 1 ) : '');
 }
 
