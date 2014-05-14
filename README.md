@@ -6,9 +6,7 @@ Lightweight, simple, configurable, drop-in and go http server for Node.js.
 ## motivation
 
 I wanted to have a simple, but effective relatively fast framework that could
-be used with many different web projects merely by typing them as an argument to
-the startup script.  *Java Play* was a sort of inspiration for the general idea.
-But mostly it grew out of necessity.
+be used with many different web projects merely by dropping in a different config. My desire at the time was to learn node's http functionality by doing rather than just reading through Express (though now I do that anyway). *Java Play* was a sort of inspiration for the general idea. But it also grew out of necessity.
 
 Example Usage:
 
